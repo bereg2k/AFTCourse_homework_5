@@ -3,11 +3,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
@@ -50,13 +53,11 @@ public class InsuranceTravelTest {
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
         driver.manage().window().maximize();
         driver.get(baseURL);
-
     }
 
     @After
-    public void afterTest() throws InterruptedException {
-//        Thread.sleep(1000);
-//        driver.quit();
+    public void afterTest() {
+        driver.quit();
     }
 
     @Test
@@ -71,7 +72,7 @@ public class InsuranceTravelTest {
 
         //4. Нажать рассчитать – Онлайн
         WebElement calculateOnlineButton = findByXPath("//a[contains(text(),'Рассчитать')]");
-        scrollIntoView(calculateOnlineButton,"down");
+        scrollIntoView(calculateOnlineButton, "down");
         calculateOnlineButton.click();
 
         //5. Проверить наличие заголовка – Страхование выезжающих за рубеж
@@ -85,7 +86,7 @@ public class InsuranceTravelTest {
 
         //- Я согласен на обработку данных (выбрать чекбокс)
         WebElement iAgreeCheckbox = findByXPath("//input[contains(@data-test-name,'IsProcessingPersonalDataTo')]");
-        scrollIntoView(iAgreeCheckbox,"down");
+        scrollIntoView(iAgreeCheckbox, "down");
         iAgreeCheckbox.click();
 
         //7. Нажать "Рассчитать"
@@ -95,18 +96,20 @@ public class InsuranceTravelTest {
         //8. Заполнить поля:
         // - Куда едем: Шенген
         WebElement countriesTextBox = driver.findElement(By.id("Countries"));
-        fillTextField(By.id("Countries"), "Шенген");
-        countriesTextBox.sendKeys(Keys.ARROW_DOWN);
-        countriesTextBox.sendKeys(Keys.ENTER);
+        new Actions(driver).sendKeys(countriesTextBox, "Шенген")
+                .sendKeys(Keys.ARROW_DOWN)
+                .sendKeys(Keys.ENTER)
+                .perform();
 
         // - Страна въезда: Испания
 
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("ArrivalCountryList")));
         WebElement arrivalCountryList = driver.findElement(By.name("ArrivalCountryList"));
         new Select(arrivalCountryList).selectByVisibleText("Испания");
 
         // - Дата первой поездки: 1 ноября
         findByXPath("//input[@data-test-name='FirstDepartureDate']").click();
-        findByXPath("//input[@data-test-name='FirstDepartureDate']").sendKeys("01112018");
+        findByXPath("//input[@data-test-name='FirstDepartureDate']").sendKeys("01.11.2018");
 
         // - Сколько дней планируете пробыть за рубежом за год: не более 90
         findByXPath("//label[contains(text(), 'Не более 90 дней')]").click();
@@ -114,10 +117,14 @@ public class InsuranceTravelTest {
         // - ФИО
         String LastNameLatin = "IVANOV";
         String FirstNameLatin = "IVAN";
-        findByXPath("//div[@class='validation-group-error-wrap']/../input[@data-test-name = 'FullName']").click();
-        findByXPath("//div[@class='validation-group-error-wrap']/../input[@data-test-name = 'FullName']").sendKeys(LastNameLatin);
-        findByXPath("//div[@class='validation-group-error-wrap']/../input[@data-test-name = 'FullName']").sendKeys(Keys.SPACE);
-        findByXPath("//div[@class='validation-group-error-wrap']/../input[@data-test-name = 'FullName']").sendKeys(FirstNameLatin);
+
+        WebElement fullNameLatinTextField =
+                findByXPath("//div[@class='validation-group-error-wrap']/../input[@data-test-name = 'FullName']");
+        fullNameLatinTextField.click();
+        new Actions(driver).sendKeys(fullNameLatinTextField, LastNameLatin)
+                .sendKeys(Keys.SPACE)
+                .sendKeys(FirstNameLatin)
+                .perform();
 
         // - Дата рождения
         String birthDay = "31.12.1988";
@@ -125,49 +132,51 @@ public class InsuranceTravelTest {
         findByXPath("//input[@data-test-name = 'BirthDate']").sendKeys(birthDay);
 
         // - Планируется активный отдых
-        scrollIntoView(findByXPath("//div[contains(@data-bind, 'activeRest')]/div[@class='toggle off toggle-rgs']"),"down");
+        scrollIntoView(findByXPath("//div[contains(@data-bind, 'activeRest')]/div[@class='toggle off toggle-rgs']"), "down");
         findByXPath("//div[contains(@data-bind, 'activeRest')]/div[@class='toggle off toggle-rgs']").click();
 
         // 9. Нажать "Рассчитать"
-        scrollIntoView(calculateButton,"down");
+        scrollIntoView(calculateButton, "down");
         calculateButton.click();
 
         // 10. Проверить значения:
         // - Условия страхования: Многократные поездки в течении года
+        List<String> report = new ArrayList<>(); //создаем массив для отчётности
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[@data-bind='with: Trips']//span")));
         WebElement tripsConditionMainLabel = findByXPath("//span[@data-bind='with: Trips']//span");
-        wait.until(ExpectedConditions.visibilityOf(tripsConditionMainLabel));
         assertEquals("Многократные поездки в течение года", tripsConditionMainLabel.getText());
-        System.out.println(tripsConditionMainLabel.getText());
+        report.add("Условия страхования: " + tripsConditionMainLabel.getText()); //собираем данные для отчёта
 
         // - Территория: Шенген
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("*//div//span//span[@data-bind='foreach: countries']//strong")));
         WebElement tripsConditionTerritoryLabel = findByXPath("*//div//span//span[@data-bind='foreach: countries']//strong");
-        wait.until(ExpectedConditions.visibilityOf(tripsConditionTerritoryLabel));
         assertEquals("Шенген", tripsConditionTerritoryLabel.getText());
-        System.out.println(tripsConditionTerritoryLabel.getText());
+        report.add("Территория действия: " + tripsConditionTerritoryLabel.getText());
 
-        /*
         // - Застрахованный
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//strong[contains(@data-bind,'FirstName')]")));
         WebElement tripsConditionNameLabel = findByXPath("//strong[contains(@data-bind,'FirstName')]");
-        wait.until(ExpectedConditions.visibilityOf(tripsConditionNameLabel));
         assertEquals(LastNameLatin + " " + FirstNameLatin, tripsConditionNameLabel.getText());
+        report.add("Застрахованный: " + tripsConditionNameLabel.getText());
 
         // - Дата рождения
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//strong[contains(@data-bind,'BirthDay')]")));
         WebElement tripsConditionBirthdayLabel = findByXPath("//strong[contains(@data-bind,'BirthDay')]");
-        wait.until(ExpectedConditions.visibilityOf(tripsConditionBirthdayLabel));
         assertEquals(birthDay, tripsConditionBirthdayLabel.getText());
+        report.add("Д.Р.: " + tripsConditionBirthdayLabel.getText());
 
         // - Активный отдых: включен
+        wait.until(ExpectedConditions.visibilityOfElementLocated
+                (By.xpath("//div[contains(@data-bind, 'risk')]//div[contains(@style, 'opa')]//span[@class = 'summary-value']//span")));
         WebElement tripsConditionActivityLabel =
                 findByXPath("//div[contains(@data-bind, 'risk')]//div[contains(@style, 'opa')]//span[@class = 'summary-value']//span");
-        wait.until(ExpectedConditions.visibilityOf(tripsConditionActivityLabel));
         assertEquals("Включен", tripsConditionActivityLabel.getText());
-        System.out.println(tripsConditionActivityLabel.getText());
-        */
-    }
+        report.add("Активный отдых или спорт: " + tripsConditionActivityLabel.getText());
 
-    private void fillTextField(By locator, String text) {
-        driver.findElement(locator).clear();
-        driver.findElement(locator).sendKeys(text);
+        //Распечатываем отчет по финальной проверке данных
+        System.out.println("\nИтоговый отчёт:\n ");
+        report.forEach(System.out::println);
     }
 
     private WebElement findByXPath(String xPath) {
