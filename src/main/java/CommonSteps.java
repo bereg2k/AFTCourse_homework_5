@@ -35,12 +35,24 @@ class CommonSteps {
         wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
-    void selectByText(WebElement element, String text){
+    void selectByText(WebElement element, String text) {
         new Select(element).selectByVisibleText(text);
     }
 
+    WebElement findByLocator(By locator) {
+        return driver.findElement(locator);
+    }
+
     WebElement findByXPath(String xPath) {
-        return driver.findElement(By.xpath(xPath));
+        return findByLocator(By.xpath(xPath));
+    }
+
+    void click(By locator){
+        findByLocator(locator).click();
+    }
+
+    void click(String xPath){
+        findByXPath(xPath).click();
     }
 
 }
