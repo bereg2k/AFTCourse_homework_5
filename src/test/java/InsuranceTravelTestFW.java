@@ -24,7 +24,7 @@ public class InsuranceTravelTestFW {
         userTest.chooseCategory("Выезжающим за рубеж");
 
         //4. Нажать рассчитать – Онлайн
-
+        userTest.chooseCalculateOption("Рассчитать");
 
         //5. Проверить наличие заголовка – Страхование выезжающих за рубеж
 

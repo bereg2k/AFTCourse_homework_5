@@ -1,4 +1,5 @@
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -47,12 +48,16 @@ class CommonSteps {
         return findByLocator(By.xpath(xPath));
     }
 
-    void click(By locator){
+    void click(By locator) {
         findByLocator(locator).click();
     }
 
-    void click(String xPath){
+    void click(String xPath) {
         findByXPath(xPath).click();
+    }
+
+    void scrollIntoView(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
     }
 
 }
