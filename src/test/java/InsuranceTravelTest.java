@@ -76,7 +76,7 @@ public class InsuranceTravelTest {
         calculateOnlineButton.click();
 
         //5. Проверить наличие заголовка – Страхование выезжающих за рубеж
-        assertEquals("Страхование выезжающих за рубеж", findByXPath("//span[contains(text(),'выезжающих')]").getText());
+        assertEquals("Страхование выезжающих за рубеж", findByXPath("//div[@class='page-header']//span[@class='h1']").getText());
 
         //6. Выбрать пункты на форме:
         //- Несколько поездок в течении года

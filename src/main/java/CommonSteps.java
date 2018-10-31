@@ -8,18 +8,21 @@ import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 class CommonSteps {
 
     WebDriver driver;
     String BASE_URL;
+    List<String> testReport = new ArrayList<>();
 
     public WebDriver getDriver() {
         return driver;
     }
 
-    public void startUp() {
+    void startUp() {
         System.setProperty("webdriver.chrome.driver", "drv/chromedriver.exe");
         driver = new ChromeDriver();
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
@@ -27,7 +30,7 @@ class CommonSteps {
         driver.get(BASE_URL);
     }
 
-    public void endTest() {
+    void endTest() {
         driver.quit();
     }
 
@@ -58,6 +61,16 @@ class CommonSteps {
 
     void scrollIntoView(WebElement element) {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+    }
+
+    void populateTextBox(By locator, String text){
+        click(locator);
+        findByLocator(locator).sendKeys(text);
+    }
+
+    void printTestReport(){
+        System.out.println("\nИтоговый отчёт:\n ");
+        testReport.forEach(System.out::println);
     }
 
 }
