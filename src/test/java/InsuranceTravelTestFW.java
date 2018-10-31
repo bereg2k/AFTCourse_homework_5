@@ -2,15 +2,19 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Новое описание кейса по расчёту стоимости полиза ВЗР с использованием методов разработки простого фреймворка.
+ * Все базовые методы инкапсулированы в дополнительные классы, которые можно найти в директории "src/main/java" проекта.
+ */
 public class InsuranceTravelTestFW {
-    private RgsSteps userTest = new RgsSteps();
+    private RgsSteps userTest = new RgsSteps(); //класс для вызова шагов теста из общего "набора"
 
-    @Before
+    @Before //инициализация
     public void beforeTest() {
         userTest.startUp();
     }
 
-    @After
+    @After //завершение
     public void afterTest() {
         userTest.endTest();
     }
@@ -24,14 +28,14 @@ public class InsuranceTravelTestFW {
         userTest.chooseCategory("Выезжающим за рубеж");
 
         //4. Нажать рассчитать – Онлайн
-        userTest.chooseCalculateOption("Рассчитать");
+        userTest.chooseCalculateOption("онлайн");
 
         //5. Проверить наличие заголовка – Страхование выезжающих за рубеж
         userTest.checkHeaderText("Страхование выезжающих за рубеж");
 
         //6. Выбрать пункты на форме:
         //- Несколько поездок в течении года
-        userTest.chooseNumberOfTrips("Несколько в течение года");
+        userTest.chooseNumberOfTrips("Несколько");
 
         //- Я согласен на обработку данных (выбрать чекбокс)
         userTest.agreementCheckBoxClick();
